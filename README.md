@@ -16,7 +16,7 @@
 ## 项目结构
 
 ```text
-sensor_data_collecter/
+sensor_data_collector/
 ├── sensor_collector/
 │   ├── __main__.py
 │   ├── config.py
@@ -83,7 +83,7 @@ python -m sensor_collector.main --config config.ini --env-file .env --check
 
 ## Linux systemd 部署
 
-1. 拷贝项目到 `/opt/sensor_data_collecter`。
+1. 拷贝项目到 `/opt/sensor_data_collector`。
 2. 修改 `config.ini` 和 `.env`。
 3. 安装服务文件：
 
