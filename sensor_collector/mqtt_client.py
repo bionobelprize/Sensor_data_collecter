@@ -24,16 +24,16 @@ class MQTTCollectorService:
         self.client.on_disconnect = self._on_disconnect
         self.client.on_message = self._on_message
 
-    def _on_connect(self, client: mqtt.Client, userdata, flags, rc: int) -> None:  # noqa: ANN001
-        if rc == mqtt.CONNACK_ACCEPTED:
+    def _on_connect(self, client: mqtt.Client, userdata, flags, result_code: int) -> None:  # noqa: ANN001
+        if result_code == mqtt.CONNACK_ACCEPTED:
             self.logger.info("MQTT connected to %s:%s", self.cfg.broker, self.cfg.port)
             client.subscribe(self.cfg.topic)
             self.logger.info("Subscribed topic wildcard: %s", self.cfg.topic)
         else:
-            self.logger.error("MQTT connect failed with code: %s", rc)
+            self.logger.error("MQTT connect failed with code: %s", result_code)
 
-    def _on_disconnect(self, client: mqtt.Client, userdata, rc: int) -> None:  # noqa: ANN001
-        if rc != 0:
+    def _on_disconnect(self, client: mqtt.Client, userdata, result_code: int) -> None:  # noqa: ANN001
+        if result_code != 0:
             self.logger.warning("MQTT disconnected unexpectedly, auto reconnecting...")
         else:
             self.logger.info("MQTT disconnected")

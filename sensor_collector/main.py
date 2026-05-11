@@ -35,8 +35,8 @@ def main() -> int:
 
     service = MQTTCollectorService(cfg.mqtt, storage, logger)
 
-    def _shutdown(signum, frame) -> None:  # noqa: ANN001
-        logger.info("Received signal %s, shutting down", signum)
+    def _shutdown(signal_number, stack_frame) -> None:  # noqa: ANN001
+        logger.info("Received signal %s, shutting down", signal_number)
         service.stop()
         sys.exit(0)
 
