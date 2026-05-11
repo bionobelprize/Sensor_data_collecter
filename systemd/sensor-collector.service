@@ -1,0 +1,15 @@
+[Unit]
+Description=MQTT Sensor Data Collector Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/sensor_data_collecter
+ExecStart=/usr/bin/python3 -m sensor_collector.main --config /opt/sensor_data_collecter/config.ini --env-file /opt/sensor_data_collecter/.env
+Restart=always
+RestartSec=5
+User=nobody
+Group=nogroup
+
+[Install]
+WantedBy=multi-user.target

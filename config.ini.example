@@ -1,0 +1,28 @@
+[mqtt]
+broker = 127.0.0.1
+port = 1883
+username =
+password =
+topic = sensors/#
+client_id = sensor-data-collector
+keepalive = 60
+
+[database]
+backend = influxdb
+retry_times = 3
+retry_delay_seconds = 2
+influx_url = http://127.0.0.1:8086
+influx_token = your-token
+influx_org = default-org
+influx_bucket = sensor_data
+mysql_host = 127.0.0.1
+mysql_port = 3306
+mysql_user = sensor_user
+mysql_password = sensor_pass
+mysql_database = sensor_data
+sqlite_path = data/sensor_data.db
+
+[logging]
+level = INFO
+log_dir = logs
+log_file = collector.log
