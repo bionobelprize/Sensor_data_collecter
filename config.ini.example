@@ -26,3 +26,8 @@ sqlite_path = data/sensor_data.db
 level = INFO
 log_dir = logs
 log_file = collector.log
+
+[status_server]
+enabled = true
+host = 127.0.0.1
+port = 5050

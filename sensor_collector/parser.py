@@ -32,6 +32,22 @@ def _extract_timestamp(payload: dict) -> datetime:
     return datetime.now(tz=timezone.utc)
 
 
+def _to_float(value: object) -> float:
+    if isinstance(value, bool):
+        raise ValueError("value must be numeric")
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            raise ValueError("value must be numeric")
+        try:
+            return float(text)
+        except ValueError as exc:
+            raise ValueError("value must be numeric") from exc
+    raise ValueError("value must be numeric")
+
+
 def parse_sensor_payload(raw_payload: bytes | str) -> SensorReading:
     if isinstance(raw_payload, bytes):
         raw_payload = raw_payload.decode("utf-8")
@@ -48,8 +64,17 @@ def parse_sensor_payload(raw_payload: bytes | str) -> SensorReading:
     timestamp = _extract_timestamp(payload)
 
     metrics: dict[str, float] = {}
+
+    # Preferred sensor payload format: {"sensor_type": "...", "value": "..."}
+    # The value can be numeric or numeric string.
+    sensor_type = payload.get("sensor_type")
+    if sensor_type:
+        if "value" not in payload:
+            raise ValueError("payload missing value for sensor_type")
+        metrics[str(sensor_type)] = _to_float(payload.get("value"))
+
     for key, value in payload.items():
-        if key in {*DEVICE_ID_KEYS, *TIMESTAMP_KEYS}:
+        if key in {*DEVICE_ID_KEYS, *TIMESTAMP_KEYS, "sensor_type", "value"}:
             continue
         if isinstance(value, (int, float)):
             metrics[key] = float(value)

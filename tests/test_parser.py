@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sensor_collector.parser import parse_sensor_payload
 
 
@@ -19,3 +21,26 @@ def test_parse_sensor_payload_invalid_json() -> None:
         assert False, "expected ValueError"
     except ValueError as exc:
         assert "invalid json payload" in str(exc)
+
+
+def test_parse_sensor_payload_sensor_type_value_string() -> None:
+    reading = parse_sensor_payload('{"device_id":"dev-2","sensor_type":"temperature","value":"24.8"}')
+
+    assert reading.device_id == "dev-2"
+    assert reading.metrics["temperature"] == 24.8
+
+
+def test_parse_sensor_payload_without_timestamp_uses_server_time() -> None:
+    before = datetime.now(tz=timezone.utc)
+    reading = parse_sensor_payload('{"device_id":"dev-3","sensor_type":"humidity","value":"45"}')
+    after = datetime.now(tz=timezone.utc)
+
+    assert before <= reading.timestamp <= after
+
+
+def test_parse_sensor_payload_sensor_type_without_value() -> None:
+    try:
+        parse_sensor_payload('{"device_id":"dev-4","sensor_type":"co2"}')
+        assert False, "expected ValueError"
+    except ValueError as exc:
+        assert "missing value" in str(exc)

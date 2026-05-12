@@ -53,10 +53,18 @@ class LoggingConfig:
 
 
 @dataclass(slots=True)
+class StatusServerConfig:
+    enabled: bool
+    host: str
+    port: int
+
+
+@dataclass(slots=True)
 class AppConfig:
     mqtt: MQTTConfig
     database: DatabaseConfig
     logging: LoggingConfig
+    status_server: StatusServerConfig
 
 
 DEFAULTS = {
@@ -88,6 +96,11 @@ DEFAULTS = {
         "level": "INFO",
         "log_dir": "logs",
         "log_file": "collector.log",
+    },
+    "status_server": {
+        "enabled": "true",
+        "host": "127.0.0.1",
+        "port": "5050",
     },
 }
 
@@ -121,6 +134,11 @@ ENV_KEY_MAP = {
         "level": "LOG_LEVEL",
         "log_dir": "LOG_DIR",
         "log_file": "LOG_FILE",
+    },
+    "status_server": {
+        "enabled": "STATUS_SERVER_ENABLED",
+        "host": "STATUS_SERVER_HOST",
+        "port": "STATUS_SERVER_PORT",
     },
 }
 
@@ -174,6 +192,11 @@ def load_config(config_path: str = "config.ini", env_file: str = ".env") -> AppC
             level=parser.get("logging", "level"),
             log_dir=parser.get("logging", "log_dir"),
             log_file=parser.get("logging", "log_file"),
+        ),
+        status_server=StatusServerConfig(
+            enabled=parser.getboolean("status_server", "enabled"),
+            host=parser.get("status_server", "host"),
+            port=parser.getint("status_server", "port"),
         ),
     )
 
