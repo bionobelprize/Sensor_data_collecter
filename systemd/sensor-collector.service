@@ -4,12 +4,12 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/sensor_data_collector
-ExecStart=/usr/bin/python3 -m sensor_collector.main --config /opt/sensor_data_collector/config.ini --env-file /opt/sensor_data_collector/.env
+WorkingDirectory=/home/yuanyi-claw2/Sensor_data_collecter
+ExecStart=/home/yuanyi-claw2/Sensor_data_collecter/venv/bin/python3 -m sensor_collector.main --env-file /home/yuanyi-claw2/Sensor_data_collecter/.env
 Restart=always
 RestartSec=5
-User=nobody
-Group=nogroup
+User=yuanyi-claw2
+Group=yuanyi-claw2
 
 [Install]
 WantedBy=multi-user.target

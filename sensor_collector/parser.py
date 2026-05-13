@@ -9,6 +9,34 @@ from sensor_collector.models import SensorReading
 DEVICE_ID_KEYS = ("device_id", "deviceId", "id")
 TIMESTAMP_KEYS = ("timestamp", "time", "ts")
 
+AGRI_TOPIC_PREFIX = "agriculture"
+AGRI_TOPIC_PARTS = 8
+
+
+def parse_agriculture_topic(topic: str) -> dict[str, str]:
+    parts = topic.split("/")
+    if len(parts) != AGRI_TOPIC_PARTS:
+        raise ValueError("topic must contain 8 parts")
+    if parts[0] != AGRI_TOPIC_PREFIX:
+        raise ValueError("topic must start with agriculture")
+
+    keys = (
+        "prefix",
+        "org_id",
+        "farm_id",
+        "region_type",
+        "region_id",
+        "device_class",
+        "device_id",
+        "data_type",
+    )
+
+    topic_data = dict(zip(keys, parts, strict=False))
+    for key in keys:
+        if not topic_data.get(key):
+            raise ValueError(f"topic missing {key}")
+    return topic_data
+
 
 def _extract_device_id(payload: dict) -> str:
     for key in DEVICE_ID_KEYS:
@@ -48,7 +76,25 @@ def _to_float(value: object) -> float:
     raise ValueError("value must be numeric")
 
 
-def parse_sensor_payload(raw_payload: bytes | str) -> SensorReading:
+def _extract_data_metrics(data_value: object) -> dict[str, float]:
+    metrics: dict[str, float] = {}
+
+    if isinstance(data_value, dict):
+        for key, value in data_value.items():
+            try:
+                metrics[str(key)] = _to_float(value)
+            except ValueError:
+                continue
+        return metrics
+
+    try:
+        metrics["value"] = _to_float(data_value)
+    except ValueError:
+        pass
+    return metrics
+
+
+def parse_sensor_payload(raw_payload: bytes | str, topic: str | None = None) -> SensorReading:
     if isinstance(raw_payload, bytes):
         raw_payload = raw_payload.decode("utf-8")
 
@@ -60,10 +106,20 @@ def parse_sensor_payload(raw_payload: bytes | str) -> SensorReading:
     if not isinstance(payload, dict):
         raise ValueError("payload must be a JSON object")
 
-    device_id = _extract_device_id(payload)
+    topic_data: dict[str, str] = {}
+    if topic:
+        topic_data = parse_agriculture_topic(topic)
+
+    device_id = topic_data.get("device_id") or _extract_device_id(payload)
     timestamp = _extract_timestamp(payload)
 
     metrics: dict[str, float] = {}
+
+    if "seq" in payload:
+        metrics["seq"] = _to_float(payload.get("seq"))
+
+    if "data" in payload:
+        metrics.update(_extract_data_metrics(payload.get("data")))
 
     # Preferred sensor payload format: {"sensor_type": "...", "value": "..."}
     # The value can be numeric or numeric string.
@@ -74,9 +130,11 @@ def parse_sensor_payload(raw_payload: bytes | str) -> SensorReading:
         metrics[str(sensor_type)] = _to_float(payload.get("value"))
 
     for key, value in payload.items():
-        if key in {*DEVICE_ID_KEYS, *TIMESTAMP_KEYS, "sensor_type", "value"}:
+        if key in {*DEVICE_ID_KEYS, *TIMESTAMP_KEYS, "sensor_type", "value", "seq", "data"}:
             continue
-        if isinstance(value, (int, float)):
-            metrics[key] = float(value)
+        try:
+            metrics[key] = _to_float(value)
+        except ValueError:
+            continue
 
     return SensorReading(device_id=device_id, timestamp=timestamp, metrics=metrics)

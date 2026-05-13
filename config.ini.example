@@ -3,7 +3,7 @@ broker = 127.0.0.1
 port = 1883
 username =
 password =
-topic = sensors/#
+topic = agriculture/+/+/+/+/+/+/+
 client_id = sensor-data-collector
 keepalive = 60
 

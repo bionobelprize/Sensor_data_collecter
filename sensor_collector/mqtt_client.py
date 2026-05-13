@@ -57,7 +57,7 @@ class MQTTCollectorService:
             self.status.mark_message_received(message.topic)
 
         try:
-            reading = parse_sensor_payload(payload_text)
+            reading = parse_sensor_payload(payload_text, topic=message.topic)
             self.storage.write(reading)
             if self.status is not None:
                 self.status.mark_message_stored()

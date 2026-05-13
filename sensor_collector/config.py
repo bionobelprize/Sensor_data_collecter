@@ -73,7 +73,7 @@ DEFAULTS = {
         "port": "1883",
         "username": "",
         "password": "",
-        "topic": "sensors/#",
+        "topic": "agriculture/+/+/+/+/+/+/+",
         "client_id": "sensor-data-collector",
         "keepalive": "60",
     },
