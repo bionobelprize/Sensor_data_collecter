@@ -15,6 +15,7 @@ influx_url = http://127.0.0.1:8086
 influx_token = your-token
 influx_org = default-org
 influx_bucket = sensor_data
+log_commands = false
 mysql_host = 127.0.0.1
 mysql_port = 3306
 mysql_user = sensor_user

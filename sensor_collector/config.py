@@ -28,6 +28,7 @@ class DatabaseConfig:
     influx_token: str
     influx_org: str
     influx_bucket: str
+    log_commands: bool
     mysql_host: str
     mysql_port: int
     mysql_user: str
@@ -85,6 +86,7 @@ DEFAULTS = {
         "influx_token": "",
         "influx_org": "default-org",
         "influx_bucket": "sensor_data",
+        "log_commands": "false",
         "mysql_host": "127.0.0.1",
         "mysql_port": "3306",
         "mysql_user": "sensor_user",
@@ -123,6 +125,7 @@ ENV_KEY_MAP = {
         "influx_token": "INFLUX_TOKEN",
         "influx_org": "INFLUX_ORG",
         "influx_bucket": "INFLUX_BUCKET",
+        "log_commands": "DB_LOG_COMMANDS",
         "mysql_host": "MYSQL_HOST",
         "mysql_port": "MYSQL_PORT",
         "mysql_user": "MYSQL_USER",
@@ -181,6 +184,7 @@ def load_config(config_path: str = "config.ini", env_file: str = ".env") -> AppC
             influx_token=parser.get("database", "influx_token"),
             influx_org=parser.get("database", "influx_org"),
             influx_bucket=parser.get("database", "influx_bucket"),
+            log_commands=parser.getboolean("database", "log_commands"),
             mysql_host=parser.get("database", "mysql_host"),
             mysql_port=parser.getint("database", "mysql_port"),
             mysql_user=parser.get("database", "mysql_user"),

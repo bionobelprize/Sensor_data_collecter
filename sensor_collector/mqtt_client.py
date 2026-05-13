@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 
 import paho.mqtt.client as mqtt
@@ -57,6 +58,22 @@ class MQTTCollectorService:
             self.status.mark_message_received(message.topic)
 
         try:
+            direct_writer = getattr(self.storage, "write_mqtt_message", None)
+            if callable(direct_writer):
+                payload = json.loads(payload_text)
+                if not isinstance(payload, dict):
+                    raise ValueError("payload must be a JSON object")
+
+                stored = bool(direct_writer(message.topic, payload))
+                if stored and self.status is not None:
+                    self.status.mark_message_stored()
+                self.logger.info(
+                    "Processed MQTT message topic=%s stored=%s",
+                    message.topic,
+                    stored,
+                )
+                return
+
             reading = parse_sensor_payload(payload_text, topic=message.topic)
             self.storage.write(reading)
             if self.status is not None:
