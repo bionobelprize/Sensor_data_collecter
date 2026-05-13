@@ -5,3 +5,4 @@ logs/
 .env
 config.ini
 venv/
+standard.md
